@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.CAMERA
     )
     private val captureResultQueue: ConcurrentLinkedQueue<CaptureResult> = ConcurrentLinkedQueue()
+    private val rawImageSaveDispatcher = Dispatchers.IO.limitedParallelism(4)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveRawImage(image: Image, result: CaptureResult) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(rawImageSaveDispatcher) {
             try {
                 val dngCreator = DngCreator(cameraManager.getCameraCharacteristics(cameraId), result)
                 // Always rotate 90 degrees clockwise
