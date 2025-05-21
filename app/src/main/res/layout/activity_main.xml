@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#000000"
+    tools:context=".MainActivity">
+
+    <!-- Camera preview -->
+
+    <!-- Take Photo Button -->
+
+    <FrameLayout
+        android:id="@+id/textureViewContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnTakePhoto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:clipToOutline="true"
+        android:background="@drawable/rounded_bottom_corners"
+        android:layout_marginBottom="39dp">
+
+        <TextureView
+            android:id="@+id/textureView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+    <!-- Guideline for 2/3rds of the screen -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6667" />
+
+    <Button
+        android:id="@+id/btnTakePhoto"
+        android:layout_width="180dp"
+        android:layout_height="70dp"
+        android:text="click"
+        android:typeface="monospace"
+        android:textSize="32sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="40sp"
+        android:autoSizeStepGranularity="2sp"
+        android:includeFontPadding="false"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="none"
+        app:layout_constraintTop_toBottomOf="@+id/guideline2_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/pill_button" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
