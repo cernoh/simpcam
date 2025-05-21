@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private var captureSession: CameraCaptureSession? = null
     private var imageReader: ImageReader? = null
     private lateinit var cameraId: String
+    private var previewSize: Size? = null
     private val cameraManager by lazy { getSystemService(CAMERA_SERVICE) as CameraManager }
     private val REQUEST_PERMISSIONS = 10
     private val REQUIRED_PERMISSIONS = arrayOf(
@@ -76,11 +77,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun configureTransform(viewWidth: Int, viewHeight: Int) {
+        val rotation = windowManager.defaultDisplay.rotation
+        val matrix = android.graphics.Matrix()
+        val preview = previewSize ?: return
+        val viewRect = android.graphics.RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
+        val bufferRect = android.graphics.RectF(0f, 0f, preview.height.toFloat(), preview.width.toFloat())
+        val centerX = viewRect.centerX()
+        val centerY = viewRect.centerY()
+        if (rotation == android.view.Surface.ROTATION_90 || rotation == android.view.Surface.ROTATION_270) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
+            matrix.setRectToRect(viewRect, bufferRect, android.graphics.Matrix.ScaleToFit.FILL)
+            val scale = Math.max(
+                viewHeight.toFloat() / preview.height,
+                viewWidth.toFloat() / preview.width
+            )
+            matrix.postScale(scale, scale, centerX, centerY)
+            matrix.postRotate((90 * (rotation - 2)).toFloat(), centerX, centerY)
+        } else if (rotation == android.view.Surface.ROTATION_180) {
+            matrix.postRotate(180f, centerX, centerY)
+        }
+        textureView.setTransform(matrix)
+    }
+
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surface: android.graphics.SurfaceTexture, width: Int, height: Int) {
+            configureTransform(width, height)
             openCamera()
         }
-        override fun onSurfaceTextureSizeChanged(surface: android.graphics.SurfaceTexture, width: Int, height: Int) {}
+        override fun onSurfaceTextureSizeChanged(surface: android.graphics.SurfaceTexture, width: Int, height: Int) {
+            configureTransform(width, height)
+        }
         override fun onSurfaceTextureDestroyed(surface: android.graphics.SurfaceTexture): Boolean = true
         override fun onSurfaceTextureUpdated(surface: android.graphics.SurfaceTexture) {}
     }
@@ -96,6 +123,7 @@ class MainActivity : AppCompatActivity() {
             val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
             val rawSizes = map?.getOutputSizes(ImageFormat.RAW_SENSOR)
             val rawSize = rawSizes?.firstOrNull() ?: Size(640, 480)
+            previewSize = rawSize // Store preview size for transform
             imageReader = ImageReader.newInstance(rawSize.width, rawSize.height, ImageFormat.RAW_SENSOR, 2)
             imageReader?.setOnImageAvailableListener({ reader ->
                 val image = reader.acquireNextImage()
